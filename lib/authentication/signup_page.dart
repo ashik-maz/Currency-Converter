@@ -1,9 +1,5 @@
-import 'dart:io';
-
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'firebaseauthservice.dart';
@@ -18,8 +14,6 @@ class SignupPage extends StatefulWidget {
 }
 
 class _SignupPageState extends State<SignupPage> {
-  final ImagePicker _picker = ImagePicker();
-  XFile? _imageFile;
   bool _isSigningUp = false;
 
   final TextEditingController _usernameController = TextEditingController();
@@ -38,82 +32,45 @@ class _SignupPageState extends State<SignupPage> {
     super.dispose();
   }
 
-  Future<void> _pickImage(ImageSource source) async {
-    try {
-      final pickedImage = await _picker.pickImage(
-        source: source,
-        maxHeight: 300,
-        maxWidth: 300,
-        imageQuality: 95,
-      );
-      setState(() {
-        _imageFile = pickedImage;
-      });
-    } catch (e) {
-      showToast(message: "Image picking error: $e");
-    }
-  }
-
   Future<void> _signUp() async {
-  if (_formKey.currentState?.validate() != true) return;
+    if (_formKey.currentState?.validate() != true) return;
 
-  setState(() {
-    _isSigningUp = true;
-  });
-
-  String username = _usernameController.text;
-  String email = _emailController.text;
-  String password = _passwordController.text;
-
-  try {
-    // Sign up the user with email and password
-    User? user = await _auth.signupWithEmailAndPassword(email, password);
-
-    if (user != null) {
-      String? profileImage;
-      
-      // Upload profile image if selected
-      if (_imageFile != null) {
-        try {
-          firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance
-              .ref('images/${user.uid}.jpg');
-
-          await ref.putFile(File(_imageFile!.path));
-          profileImage = await ref.getDownloadURL();
-        } catch (e) {
-          showToast(message: "Image upload error: $e");
-          print("Image upload error: $e");
-        }
-      }
-
-      // Save user data in Firestore
-      try {
-        await users.doc(user.uid).set({
-          'name': username,
-          'email': email,
-          'cid': user.uid,
-          'profileImage': profileImage ?? '',
-        });
-        
-        showToast(message: "User Successfully Created");
-        Navigator.pushNamed(context, "/home");
-      } catch (e) {
-        showToast(message: "Firestore write error: $e");
-        print("Firestore write error: $e");
-      }
-    } else {
-      showToast(message: "Error during sign up!");
-    }
-  } catch (e) {
-    showToast(message: "Sign up error: $e");
-    print("Sign up error: $e");
-  } finally {
     setState(() {
-      _isSigningUp = false;
+      _isSigningUp = true;
     });
-  }
-}
 
+    String username = _usernameController.text;
+    String email = _emailController.text;
+    String password = _passwordController.text;
+
+    try {
+      User? user = await _auth.signupWithEmailAndPassword(email, password);
+
+      if (user != null) {
+        try {
+          await users.doc(user.uid).set({
+            'name': username,
+            'email': email,
+            'cid': user.uid,
+            'profileImage': '', // Can leave empty or remove this line entirely
+          });
+
+          showToast(message: "User Successfully Created");
+          Navigator.pushNamed(context, "/home");
+        } catch (e) {
+          showToast(message: "Firestore write error: $e");
+        }
+      } else {
+        showToast(message: "Error during sign up!");
+      }
+    } catch (e) {
+      showToast(message: "Sign up error: $e");
+    } finally {
+      setState(() {
+        _isSigningUp = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -134,65 +91,6 @@ class _SignupPageState extends State<SignupPage> {
                   key: _formKey,
                   child: Column(
                     children: [
-                      Row(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 20, horizontal: 40),
-                            child: CircleAvatar(
-                              radius: 60,
-                              backgroundColor: Colors.purpleAccent,
-                              backgroundImage: _imageFile == null
-                                  ? null
-                                  : FileImage(File(_imageFile!.path)),
-                              child: _imageFile == null
-                                  ? const Icon(
-                                      Icons.person,
-                                      size: 60,
-                                      color: Colors.white,
-                                    )
-                                  : null,
-                            ),
-                          ),
-                          Column(
-                            children: [
-                              Container(
-                                decoration: const BoxDecoration(
-                                  color: Colors.purple,
-                                  borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(15),
-                                    topRight: Radius.circular(15),
-                                  ),
-                                ),
-                                child: IconButton(
-                                  icon: const Icon(
-                                    Icons.camera_alt,
-                                    color: Colors.white,
-                                  ),
-                                  onPressed: () => _pickImage(ImageSource.camera),
-                                ),
-                              ),
-                              const SizedBox(height: 6),
-                              Container(
-                                decoration: const BoxDecoration(
-                                  color: Colors.purple,
-                                  borderRadius: BorderRadius.only(
-                                    bottomLeft: Radius.circular(15),
-                                    bottomRight: Radius.circular(15),
-                                  ),
-                                ),
-                                child: IconButton(
-                                  icon: const Icon(
-                                    Icons.photo,
-                                    color: Colors.white,
-                                  ),
-                                  onPressed: () => _pickImage(ImageSource.gallery),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
                       const SizedBox(height: 30),
                       FormContainerWidget(
                         controller: _usernameController,
