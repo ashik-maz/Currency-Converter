@@ -43,43 +43,45 @@ class _ProfileState extends State<Profile> {
         return _buildScaffold(
           body: Padding(
             padding: const EdgeInsets.all(24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 20),
-                Text(
-                  "EMAIL: ${data['email']?.toUpperCase() ?? 'No email'}",
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  "NAME: ${data['name']?.toUpperCase() ?? 'No name'}",
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 40),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
-                  onPressed: () {
-                    MyAlertDilaog.showMyDialog(
-                      context: context,
-                      title: 'Log Out',
-                      content: 'Are you sure you want to log out?',
-                      tabNo: () {
-                        Navigator.pop(context);
-                      },
-                      tabYes: () async {
-                        await FirebaseAuth.instance.signOut();
-                        Navigator.pop(context);
-                        Navigator.pushReplacementNamed(context, '/login');
-                      },
-                    );
-                  },
-                  child: const Text(
-                    "Log out",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+            child: Center(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 20),
+                  Text(
+                    "EMAIL: ${data['email']?.toUpperCase() ?? 'No email'}",
+                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 12),
+                  Text(
+                    "NAME: ${data['name']?.toUpperCase() ?? 'No name'}",
+                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 40),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+                    onPressed: () {
+                      MyAlertDilaog.showMyDialog(
+                        context: context,
+                        title: 'Log Out',
+                        content: 'Are you sure you want to log out?',
+                        tabNo: () {
+                          Navigator.pop(context);
+                        },
+                        tabYes: () async {
+                          await FirebaseAuth.instance.signOut();
+                          Navigator.pop(context);
+                          Navigator.pushReplacementNamed(context, '/login');
+                        },
+                      );
+                    },
+                    child: const Text(
+                      "Log out",
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         );
